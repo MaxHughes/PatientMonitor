@@ -82,6 +82,8 @@
             this.tipThresholds = new System.Windows.Forms.ToolTip(this.components);
             this.btnOptions = new System.Windows.Forms.Button();
             this.timerRefresh = new System.Windows.Forms.Timer(this.components);
+            this.lblNurse = new System.Windows.Forms.Label();
+            this.lblNurseName = new System.Windows.Forms.Label();
             this.gbxThresholds.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -203,12 +205,14 @@
             "Bed 6",
             "Bed 7",
             "Bed 8",
-            "Bed 9"});
+            "Bed 9",
+            "Bed 10"});
             this.cbxBed.Location = new System.Drawing.Point(52, 12);
             this.cbxBed.MaxDropDownItems = 10;
             this.cbxBed.Name = "cbxBed";
             this.cbxBed.Size = new System.Drawing.Size(121, 21);
             this.cbxBed.TabIndex = 4;
+            this.cbxBed.SelectedIndexChanged += new System.EventHandler(this.cbxBed_SelectedIndexChanged);
             // 
             // Btn_close
             // 
@@ -527,9 +531,9 @@
             this.lblHRMax.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblHRMax.Location = new System.Drawing.Point(115, 32);
             this.lblHRMax.Name = "lblHRMax";
-            this.lblHRMax.Size = new System.Drawing.Size(21, 13);
+            this.lblHRMax.Size = new System.Drawing.Size(28, 13);
             this.lblHRMax.TabIndex = 27;
-            this.lblHRMax.Text = "80";
+            this.lblHRMax.Text = "140";
             // 
             // label20
             // 
@@ -585,7 +589,7 @@
             this.tbrHRMax.Size = new System.Drawing.Size(105, 45);
             this.tbrHRMax.TabIndex = 18;
             this.tbrHRMax.TickFrequency = 10;
-            this.tbrHRMax.Value = 80;
+            this.tbrHRMax.Value = 140;
             this.tbrHRMax.ValueChanged += new System.EventHandler(this.tbrHRMax_OnValueChanged);
             // 
             // tbrBRMax
@@ -661,15 +665,35 @@
             // 
             // timerRefresh
             // 
-            this.timerRefresh.Enabled = true;
             this.timerRefresh.Interval = 1000;
             this.timerRefresh.Tick += new System.EventHandler(this.timerRefresh_Tick);
+            // 
+            // lblNurse
+            // 
+            this.lblNurse.AutoSize = true;
+            this.lblNurse.Location = new System.Drawing.Point(334, 20);
+            this.lblNurse.Name = "lblNurse";
+            this.lblNurse.Size = new System.Drawing.Size(75, 13);
+            this.lblNurse.TabIndex = 9;
+            this.lblNurse.Text = "Current Nurse:";
+            // 
+            // lblNurseName
+            // 
+            this.lblNurseName.AutoSize = true;
+            this.lblNurseName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblNurseName.Location = new System.Drawing.Point(412, 20);
+            this.lblNurseName.Name = "lblNurseName";
+            this.lblNurseName.Size = new System.Drawing.Size(42, 13);
+            this.lblNurseName.TabIndex = 10;
+            this.lblNurseName.Text = "NAME";
             // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(480, 503);
+            this.Controls.Add(this.lblNurseName);
+            this.Controls.Add(this.lblNurse);
             this.Controls.Add(this.btnOptions);
             this.Controls.Add(this.lblBed);
             this.Controls.Add(this.gbxMonitor);
@@ -759,5 +783,7 @@
         private System.Windows.Forms.Label lblDiaPressure;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Timer timerRefresh;
+        private System.Windows.Forms.Label lblNurse;
+        private System.Windows.Forms.Label lblNurseName;
     }
 }

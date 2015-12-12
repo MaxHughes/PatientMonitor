@@ -16,6 +16,8 @@ namespace PatientMonitor
         public Monitor()
         {
             InitializeComponent();
+            applyInitialThresholds();
+            lblNurseName.Text = _curNurse;
         }
 
         private void tbrHRMin_OnValueChanged(object sender, EventArgs e)
@@ -67,8 +69,24 @@ namespace PatientMonitor
             lblDiaPressureMax.Text = tbrDiaPressureMax.Value.ToString();
         }
 
+        // Intialise jagged array of multidimensional arrays holding min and max alarm
+        // thresholds for each of the patient vitals
+        int[][,] alarmThreshold = new int[10][,]
+        {
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+            new int[5,2],
+        };
+
         /// <summary>
-        /// send all the patient details and custom limits through MinRate and MaxRate method
+        /// Applies min and max alarm thresholds for current patient vitals
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -77,98 +95,24 @@ namespace PatientMonitor
             // Apply threshold values only if a bed is selected 
             if (cbxBed.SelectedIndex > -1)
             {
-                if (_hrEnable == true)
-                {
-                    //call MinRate and MaxRate
-                    MinRate(tbrHRMin, heartRate);
-                    MaxRate(tbrHRMax, heartRate);
-                }
-
-                if (_breathEnable == true)
-                {
-                    //call MinRate and MaxRate
-                    MinRate(tbrBRMin, breathingRate);
-                    MaxRate(tbrBRMax, breathingRate);
-                }
-                    
-                if (_pressureEnable == true)
-                {
-                    //call MinRate and MaxRate
-                    MinRate(tbrSysPressureMin, bloodPressure);
-                    MaxRate(tbrSysPressureMax, bloodPressure);
-
-                    //call MinRate and MaxRate
-                    MinRate(tbrDiaPressureMin, lblDiaPressure);
-                    MaxRate(tbrDiaPressureMax, lblDiaPressure);
-                }
-
-                if (_tempEnable == true)
-                {
-                    //call MinRate and MaxRate
-                    MinRate(tbrTempMin, temperature);
-                    MaxRate(tbrTempMax, temperature);
-                }
-                
+                // Set alarm thresholds for currently selected bed
+                setThresholds(_curBed);
             }
             else
             {
                 MessageBox.Show("Error: You must select a bed first.", "No bed selected!");
             }
-
-           
-        }
-        /// <summary>
-        /// The Minimum limit for the alarm
-        /// </summary>
-        /// <param name="tbrLimit">The limit that is the user inputs</param>
-        /// <param name="lblRate">one of the 4 body rates</param>
-        private void MinRate(TrackBar tbrLimit, Label lblRate)
-        {
-            // Convert to double
-            Double limit = Convert.ToDouble(tbrLimit.Value);
-            Double rate = Convert.ToDouble(lblRate.Text);
-
-            //when rate goes below min
-            if (rate < limit)
-            {
-                //if there isnt already an alarm
-                //help from http://stackoverflow.com/questions/13445155/how-to-check-if-form-is-open-if-open-close-form
-                if (!Application.OpenForms.OfType<AlarmBelow>().Any())
-                {
-                    //PLACE ALARM
-                    AlarmBelow m = new AlarmBelow();
-                    m.Show();
-                }
-            }
-        }
-
-        /// <summary>
-        /// The Maximum limit for the alarm
-        /// </summary>
-        /// <param name="tbrLimit">The limit that is the user inputs</param>
-        /// <param name="lblRate">one of the 4 body rates</param>
-        private void MaxRate(TrackBar tbrLimit, Label lblRate)
-        {
-            // Convert to double
-            Double limit = Convert.ToDouble(tbrLimit.Value);
-            Double rate = Convert.ToDouble(lblRate.Text);
-
-            //when rate goes below min
-            if (rate > limit)
-            {
-                //if there isnt already an alarm
-                if (!Application.OpenForms.OfType<AlarmAbove>().Any())
-                {
-                    //PLACE ALARM
-                    AlarmAbove m = new AlarmAbove();
-                    m.Show();
-                }
-            }
         }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            this.Close();
+            // Confirm that user really wants to close the monitor
+            DialogResult dialogResult = MessageBox.Show("Patient monitoring will be stopped. Are you sure?", "Close Monitor", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                // Close the monitor
+                this.Close();
+            }
         }
 
         private void btnOptions_Click(object sender, EventArgs e)
@@ -180,11 +124,13 @@ namespace PatientMonitor
         private void timerRefresh_Tick(object sender, EventArgs e)
         {
             updateDisplay();
+            checkAlarm();
         }
 
+        // Updates display with sensor values for enabled modules
         private void updateDisplay()
         {
-            // Updates display with enabled sensor values only if a bed is selected 
+            // Only procceed if a bed is selected 
             if (cbxBed.SelectedIndex > -1)
             {
                 if (_hrEnable == true) heartRate.Text = Sensor.heartRate.ToString();
@@ -205,6 +151,57 @@ namespace PatientMonitor
                 }
             }
             
+        }
+
+        private void checkAlarm()
+        {
+            if (_hrEnable == true)
+            {
+                // Check heart rate
+                int curHR = int.Parse(heartRate.Text);
+                // Place alarm if past min or max threshold
+                if (curHR < alarmThreshold[_curBed][0,0] || curHR > alarmThreshold[_curBed][0, 1]) placeAlarm();
+            }
+
+            if (_breathEnable == true)
+            {
+                // Check breathing rate
+                int curBR = int.Parse(breathingRate.Text);
+                // Place alarm if past min or max threshold
+                if (curBR < alarmThreshold[_curBed][1, 0] || curBR > alarmThreshold[_curBed][1, 1]) placeAlarm();
+            }
+
+            if (_pressureEnable == true)
+            {
+                // Check systolic pressure
+                int curSys = int.Parse(bloodPressure.Text);
+                // Place alarm if past min or max threshold
+                if (curSys < alarmThreshold[_curBed][2, 0] || curSys > alarmThreshold[_curBed][2, 1]) placeAlarm();
+                
+                // Check diastolic pressure
+                int curDia = int.Parse(lblDiaPressure.Text);
+                // Place alarm if past min or max threshold
+                if (curDia < alarmThreshold[_curBed][3, 0] || curDia > alarmThreshold[_curBed][3, 1]) placeAlarm();
+            }
+
+            if (_tempEnable == true)
+            {
+                // Check temperature
+                double curTemp = double.Parse(temperature.Text);
+                // Place alarm if past min or max threshold
+                if (curTemp < alarmThreshold[_curBed][4, 0] || curTemp > alarmThreshold[_curBed][4, 1]) placeAlarm();
+            }
+        }
+
+        private void placeAlarm()
+        {
+            // If there isnt already an alarm
+            if (!Application.OpenForms.OfType<Alarm>().Any())
+            {
+                //PLACE ALARM
+                Alarm m = new Alarm();
+                m.Show();
+            }
         }
 
         static bool _hrEnable = true;
@@ -235,5 +232,64 @@ namespace PatientMonitor
             set { _tempEnable = value; }
         }
 
+        static int _curBed;
+        public static int curBed
+        {
+            get { return _curBed; }
+        }
+
+        static string _curNurse;
+        public static string curNurse
+        {
+            get { return _curNurse; }
+            set { _curNurse = value; }
+        }
+
+        private void updateSelection()
+        {
+            _curBed = cbxBed.SelectedIndex;
+            Sensor.initialize();
+        }
+
+        private void cbxBed_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbxBed.SelectedIndex > -1)
+            {
+                timerRefresh.Enabled = true;
+                updateSelection();
+            }
+            else timerRefresh.Enabled = false;
+        }
+
+        private void applyInitialThresholds()
+        {
+            for (int i = 0; i <= 9; i++)
+            {
+                setThresholds(i);
+            }
+        }
+
+        private void setThresholds(int bed)
+        {
+            // Set heart rate thresholds
+            alarmThreshold[bed][0, 0] = tbrHRMin.Value;
+            alarmThreshold[bed][0, 1] = tbrHRMax.Value;
+
+            // Set breathing rate thresholds
+            alarmThreshold[bed][1, 0] = tbrBRMin.Value;
+            alarmThreshold[bed][1, 1] = tbrBRMax.Value;
+
+            // Set Systolic pressure thresholds
+            alarmThreshold[bed][2, 0] = tbrSysPressureMin.Value;
+            alarmThreshold[bed][2, 1] = tbrSysPressureMax.Value;
+
+            // Set Diastolic pressure thresholds
+            alarmThreshold[bed][3, 0] = tbrDiaPressureMin.Value;
+            alarmThreshold[bed][3, 1] = tbrDiaPressureMax.Value;
+
+            // Set temperature thresholds
+            alarmThreshold[bed][4, 0] = tbrTempMin.Value;
+            alarmThreshold[bed][4, 1] = tbrTempMax.Value;
+        }
     }
 }

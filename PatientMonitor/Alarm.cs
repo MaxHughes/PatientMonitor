@@ -11,26 +11,33 @@ using System.Windows.Forms;
 
 namespace PatientMonitor
 {
-    public partial class AlarmAbove : Form
+    public partial class Alarm : Form
     {
-        public AlarmAbove()
+        public Alarm()
         {
             InitializeComponent();
+            // Set window title
+            this.Text = "Patient in bed " + (Monitor.curBed + 1) + " needs attention!";
+
+            // Play alarm sound and command it to loop
+            MutableAlarm.PlayLooping();
+            muted = false;
         }
 
         //add soundplayer function which will play a resource file
         SoundPlayer MutableAlarm = new SoundPlayer(ResourceAlarm.MutableAlarm);
 
+        // Declare bool for muted state
+        bool muted;
+
         //add int value to work as a visable counter
         int i;
         private void tmrAboveLimit_Tick(object sender, EventArgs e)
         {
-            if (Application.OpenForms.OfType<AlarmAbove>().Any())
+            if (Application.OpenForms.OfType<Alarm>().Any())
             {
-                //play alarm sound when timer starts and command it to loop
-                MutableAlarm.PlayLooping();
+                // Increment counter
                 i++;
-                
                 //convert int value to appear as text
                 lblCounterAbove.Text = i.ToString() + " Seconds";
              }
@@ -38,7 +45,6 @@ namespace PatientMonitor
 
         private void btnDisableAbove_Click(object sender, EventArgs e)
         {
-
             //call timer recorder method to record the time taken
             TimerRecorder timesUp = new TimerRecorder();
 
@@ -51,8 +57,28 @@ namespace PatientMonitor
             //stop the timer and alarm sound when user clicks disable
             tmrAboveLimit.Stop();
             MutableAlarm.Stop();
+        }
 
+        private void btnMute_Click(object sender, EventArgs e)
+        {
+            if (muted == false)
+            {
+                // Stop alarm sound
+                MutableAlarm.Stop();
+                muted = true;
 
+                // Update button label
+                btnMute.Text = "Unmute Alarm";
+            }
+            else
+            {
+                // Play alarm sound and command it to loop
+                MutableAlarm.PlayLooping();
+                muted = false;
+
+                // Update button label
+                btnMute.Text = "Mute Alarm";
+            }
         }
     }
 }

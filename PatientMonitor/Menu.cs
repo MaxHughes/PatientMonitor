@@ -19,8 +19,8 @@ namespace PatientMonitor
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            // Confirm if user really wants to exit the application
-            DialogResult dialogResult = MessageBox.Show("Are you sure you wish to exit?", "Are you sure?", MessageBoxButtons.YesNo);
+            // Confirm that user really wants to exit the application
+            DialogResult dialogResult = MessageBox.Show("Are you sure you wish to exit?", "Exit Application", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.Yes)
             {
                 // Exit the application
@@ -28,21 +28,17 @@ namespace PatientMonitor
             }
         }
 
-        private void btnOption_Click(object sender, EventArgs e)
-        {
-            Options m = new Options();
-            m.Show();
-        }
-
         private void btnManage_Click(object sender, EventArgs e)
         {
-            Management m = new Management();
+            Login m = new Login();
+            m.management = true;
             m.Show();
         }
 
         private void btnMonitor_Click(object sender, EventArgs e)
         {
-            Monitor m = new Monitor();
+            Login m = new Login();
+            m.management = false;
             m.Show();
         }
 
