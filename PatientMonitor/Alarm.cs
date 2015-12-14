@@ -16,8 +16,6 @@ namespace PatientMonitor
         public Alarm()
         {
             InitializeComponent();
-            // Set window title
-            this.Text = "Patient in bed " + (Monitor.curBed + 1) + " needs attention!";
 
             // Play alarm sound and command it to loop
             MutableAlarm.PlayLooping();
@@ -31,25 +29,28 @@ namespace PatientMonitor
         bool muted;
 
         //add int value to work as a visable counter
-        int i;
+        int count;
         private void tmrAboveLimit_Tick(object sender, EventArgs e)
         {
             if (Application.OpenForms.OfType<Alarm>().Any())
             {
                 // Increment counter
-                i++;
+                count++;
                 //convert int value to appear as text
-                lblCounterAbove.Text = i.ToString() + " Seconds";
+                lblCounterAbove.Text = count.ToString() + " Seconds";
              }
         }
 
+        // Instantiate  ResponseTime table adapter
+        MonitorDBTableAdapters.ResponseTimesTableAdapter responseTableAdapter = new MonitorDBTableAdapters.ResponseTimesTableAdapter();
+
+        // Instantiate  Staff table adapter
+        MonitorDBTableAdapters.StaffTableAdapter staffTableAdapter = new MonitorDBTableAdapters.StaffTableAdapter();
+
         private void btnDisableAbove_Click(object sender, EventArgs e)
         {
-            //call timer recorder method to record the time taken
-            TimerRecorder timesUp = new TimerRecorder();
-
-            //call timer recorder class
-            timesUp.csvWriter(lblCounterAbove.Text);
+            // Write response time to database
+            responseTableAdapter.Insert(Monitor.curBed + 1, staffTableAdapter.StaffIDQuery(Monitor.curStaff), DateTime.Now, count);
 
             //close the form once pressed
             this.Close();
@@ -80,5 +81,6 @@ namespace PatientMonitor
                 btnMute.Text = "Mute Alarm";
             }
         }
+
     }
 }

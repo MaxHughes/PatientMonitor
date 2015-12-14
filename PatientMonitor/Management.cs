@@ -17,14 +17,37 @@ namespace PatientMonitor
             InitializeComponent();
         }
 
+        /* -------- Event Handlers -------- */
+
+        /// <summary>
+        /// Closes management interface
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void btnOption_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Fiils data grid views with database tables
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Management_Load(object sender, EventArgs e)
         {
-            Options m = new Options();
+            this.responseTimesTableAdapter.Fill(this.monitorDB.ResponseTimes);
+            this.shiftsTableAdapter1.Fill(this.monitorDB.Shifts);
+        }
+
+        /// <summary>
+        /// Opens new instance of staff creator
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnAddStaff_Click(object sender, EventArgs e)
+        {
+            NewUser m = new NewUser();
             m.Show();
         }
     }
